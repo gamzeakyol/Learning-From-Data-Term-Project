@@ -12,8 +12,11 @@ from scipy import stats
 
 
 dataset = pd.read_csv('train.txt')
+'''returns = dataset['returnShipment']
+del dataset['returnShipment']'''
 dataset['age'] = -1
 dataset['deliveryDuration'] = -1
+#dataset['returnShipment'] = returns
 dataset = np.array(dataset, dtype = str)
 
 hayda = 0
@@ -118,18 +121,25 @@ for i in range(len(dataset)):
         if dataset[i][2] != '?' and dataset[i][5] != '?' and dataset[i][10] != '?' and difference[i] != 'Time error':
                 noErrorDataset.append(dataset[i])
         
-noErrorDataset = np.array(noErrorDataset, float) 
+noErrorDataset = np.array(noErrorDataset)
 noErrorDataset = np.delete(noErrorDataset, 12, 1)
 noErrorDataset = np.delete(noErrorDataset, 10, 1)
 noErrorDataset = np.delete(noErrorDataset, 2, 1)
 noErrorDataset = np.delete(noErrorDataset, 1, 1)
 noErrorDataset = np.delete(noErrorDataset, 0, 1)
+noErrorDataset = np.array(noErrorDataset,float) 
 
-dataset = pd.read_csv('gamah.csv')
-dataset = np.array(dataset)
-noErrorDataset = stats.zscore(dataset,axis=0)
+#dataset = pd.read_csv('gamah.csv')
+#dataset = np.array(dataset)
+'''temp = noErrorDataset[:,8]
+noErrorDataset[:,8] = noErrorDataset[:,10]
+noErrorDataset[:,10] = temp
+'''
+noErrorDataset[:,[8, 10]] = noErrorDataset[:,[10, 8]]
+
+
+noErrorDataset[:, :10] = stats.zscore(noErrorDataset[:, :10],axis=0)
 
 
 np.savetxt("gamah.csv", noErrorDataset, delimiter=",", fmt="%s")
-
 
