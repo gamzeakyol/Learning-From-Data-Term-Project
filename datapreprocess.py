@@ -7,12 +7,15 @@ Created on Mon May  7 17:23:36 2018
 import numpy as np
 import pandas as pd
 from scipy import stats
+from collections import Counter
 
 
 
 trainDataset = pd.read_csv('train.txt')
 trainDataset['age'] = -1
 trainDataset['deliveryDuration'] = -1
+trainDataset['closenessToValentine'] = -1
+trainDataset['closenessToNewYearsEve'] = -1
 
 trainDataset = np.array(trainDataset, dtype = str)
 
@@ -20,10 +23,28 @@ year = []
 month = []
 day = []
 difference = []
+
+cnt = Counter(trainDataset[:, 10])
+mostCommon = cnt.most_common(1)
+mostCommon10 = mostCommon[0][0]
+
 for i in range(len(trainDataset)):
         trainDataset[i][4] = trainDataset[i][4].lower()
+        
+        #fix colors
+        if trainDataset[i][5] == 'blau':
+                trainDataset[i][5] = 'blue'
+                
+        elif trainDataset[i][5] == 'brwon':
+                trainDataset[i][5] = 'brown'
+                
+        elif trainDataset[i][5] == 'ol' or trainDataset[i][5] == 'oliv':
+                trainDataset[i][5] = 'olive'
+                
+        # no country for old men
+        if trainDataset[i][10].split("-")[0] == "1900":
+                trainDataset[i][10] = mostCommon10
 
-                        
         if trainDataset[i][2] != '?' and trainDataset[i][1] != '?' and trainDataset[i][10] != '?': 
                 year.append((int(trainDataset[i][2].split("-")[0]) - int(trainDataset[i][1].split("-")[0]))*365)
                 month.append((int(trainDataset[i][2].split("-")[1]) - int(trainDataset[i][1].split("-")[1]))*30)
@@ -41,12 +62,12 @@ for i in range(len(trainDataset)):
                 difference.append('error')
                 trainDataset[i][14] = 'error'
                 trainDataset[i][15] = 'error'
+                
 
 items = np.array(trainDataset[:,3],int)
 colors = np.array(trainDataset[:,5],str)
 
 #item_color = np.zeros((2945, 84),int)
-
 unique_colors = set(colors)
 uniqueColors = []
 for i in unique_colors:
