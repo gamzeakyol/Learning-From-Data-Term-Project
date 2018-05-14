@@ -108,20 +108,27 @@ for i in range(len(dataset)):
                         dataset[i][11] = j
                         break
 
+cnt = Counter(dataset[:, 14])
+mostCommon = cnt.most_common(2)
+mostCommon14 = mostCommon[1][0]
 
-                
+cnt = Counter(dataset[:, 15])
+mostCommon = cnt.most_common(2)
+mostCommon15 = mostCommon[1][0]
+
 for i in range(len(dataset)):
-        
         if dataset[i][14] == 'error':
-                
-                cnt = Counter(dataset[:, 14])
-                mostCommon = cnt.most_common(2)
-                dataset[i][14] = dataset[np.argmax(dataset[:, 14]), 14]
+                dataset[i][14] = mostCommon14
         if dataset[i][15] == 'error':
-                dataset[i][15] = dataset[np.argmax(dataset[:, 15]), 15]
-                dataset[np.argmax(dataset[:, 14]), 14]
+                dataset[i][15] = mostCommon15
         if dataset[i][5] == '?':
                 dataset[i][5] = 25
+
+for i in range(len(dataset)):
+        if 'error' in dataset[i]:
+                print(i)
+                print(dataset)
+                break
         
 dataset = np.delete(dataset, 12, 1)
 dataset = np.delete(dataset, 10, 1)
