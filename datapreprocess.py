@@ -8,10 +8,10 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from collections import Counter
+from sklearn.preprocessing import OneHotEncoder
 
 
-
-trainDataset = pd.read_csv('train.txt')
+trainDataset = pd.read_csv('minitrain.txt')
 trainDataset['age'] = -1
 trainDataset['deliveryDuration'] = -1
 trainDataset['closenessToValentine'] = -1
@@ -25,8 +25,7 @@ day = []
 difference = []
 
 cnt = Counter(trainDataset[:, 10])
-mostCommon = cnt.most_common(1)
-mostCommon10 = mostCommon[0][0]
+mostCommon = cnt.most_common(3)
 
 for i in range(len(trainDataset)):
         trainDataset[i][4] = trainDataset[i][4].lower()
@@ -43,7 +42,7 @@ for i in range(len(trainDataset)):
                 
         # no country for old men
         if trainDataset[i][10].split("-")[0] == "1900":
-                trainDataset[i][10] = mostCommon10
+                trainDataset[i][10] = mostCommon[2][0]
 
         if trainDataset[i][2] != '?' and trainDataset[i][1] != '?' and trainDataset[i][10] != '?': 
                 year.append((int(trainDataset[i][2].split("-")[0]) - int(trainDataset[i][1].split("-")[0]))*365)
@@ -62,7 +61,13 @@ for i in range(len(trainDataset)):
                 difference.append('error')
                 trainDataset[i][14] = 'error'
                 trainDataset[i][15] = 'error'
+        
+        if trainDataset[i][2] != '?':
+                tempMonthNewYear = abs(int(trainDataset[i][2].split("-")[1]) - 12)*30
+                trainDataset[i][17] = tempMonthNewYear + abs(int(trainDataset[i][2].split("-")[2]) - 31)
                 
+                tempMonthValentine = abs(int(trainDataset[i][2].split("-")[1]) - 2)*30
+                trainDataset[i][16] = tempMonthValentine + abs(int(trainDataset[i][2].split("-")[2]) - 14)
 
 items = np.array(trainDataset[:,3],int)
 colors = np.array(trainDataset[:,5],str)
@@ -142,10 +147,19 @@ noErrorDataset = np.delete(noErrorDataset, 1, 1)
 noErrorDataset = np.delete(noErrorDataset, 0, 1)
 noErrorDataset = np.array(noErrorDataset,float) 
 
-noErrorDataset[:,[8, 10]] = noErrorDataset[:,[10, 8]]
+noErrorDataset[:,[8, 12]] = noErrorDataset[:,[12, 8]]
 
+'''
+sizesOneHot = np.zeros((len(noErrorDataset),len(uniqueSizes)))
+sizesOneHot[np.arange(len(noErrorDataset)), noErrorDataset[:,1]] = 1
+'''
 
-noErrorDataset[:, :10] = stats.zscore(noErrorDataset[:, :10],axis=0)
-
+noErrorDataset[:, :12] = stats.zscore(noErrorDataset[:, :12],axis=0)
 
 np.savetxt("trainDataset.csv", noErrorDataset, delimiter=",", fmt="%s")
+
+
+a = np.array([1, 0, 3])
+b = np.zeros((3, 4))
+b[np.arange(3), a] = 1
+print(b)
