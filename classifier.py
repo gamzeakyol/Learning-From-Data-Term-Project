@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon May 14 12:47:43 2018
-
 @author: mloz
 """
 
@@ -10,16 +9,28 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import KFold, cross_val_score, cross_val_predict
 from sklearn.neural_network import MLPClassifier
+import csv
 
+def readTestData():
+    # Read data
+    data = []
+    ifile = open("testDataset.csv","r")
+    read = csv.reader(ifile)
+    
+    for row in read:
+        data.append(row)
+    data = np.array(data, dtype=np.float64)
+    
+    return data
 
 trainSet= pd.read_csv('trainDataset.csv')
-testSet = pd.read_csv('testDataset.csv')
+testSet = readTestData()
 
 trainSet = np.array(trainSet)
 testSet = np.array(testSet)
 
-X = trainSet[:,:10]
-Y = trainSet[:,10:11]
+X = trainSet[:,:12]
+Y = trainSet[:,12:13]
 
 clf = RandomForestClassifier(random_state=0)
 
@@ -31,7 +42,7 @@ mlp = MLPClassifier(hidden_layer_sizes=(20,50), activation='relu', solver='adam'
 
 classifier = mlp.fit(X, Y)
 
-testX = testSet[:,:10]
+testX = testSet[:,:12]
 
 predicts = classifier.predict_proba(testX)
 
@@ -53,3 +64,4 @@ kf = KFold(n_splits=3, random_state=None, shuffle=True)
 randomforest = RandomForestClassifier(n_estimators=200)
 score = cross_val_score(randomforest,X,Y,cv=kf,scoring='accuracy')
 '''
+
