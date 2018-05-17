@@ -2,7 +2,7 @@
 """
 Created on Mon May 14 13:31:31 2018
 
-@author: mloz & gam
+@author: mloz & gam & pelo
 """
 import numpy as np
 import pandas as pd
@@ -12,6 +12,8 @@ from collections import Counter
 dataset = pd.read_csv('test.txt')
 dataset['age'] = -1
 dataset['deliveryDuration'] = -1
+dataset['closenessToValentine'] = -1
+dataset['closenessToNewYearsEve'] = -1
 
 # if test set is processed
 dataset['dummyReturnShipment'] = -1
@@ -21,9 +23,26 @@ year = []
 month = []
 day = []
 difference = []
+
+cnt = Counter(dataset[:, 10])
+mostCommon = cnt.most_common(3)
+
 for i in range(len(dataset)):
         dataset[i][4] = dataset[i][4].lower()
-
+        
+        #fix colors
+        if dataset[i][5] == 'blau':
+                dataset[i][5] = 'blue'
+                
+        elif dataset[i][5] == 'brwon':
+                dataset[i][5] = 'brown'
+                
+        elif dataset[i][5] == 'ol' or dataset[i][5] == 'oliv':
+                dataset[i][5] = 'olive'
+                
+        # no country for old men
+        if dataset[i][10].split("-")[0] == "1900":
+                dataset[i][10] = mostCommon[2][0]
                         
         if dataset[i][2] != '?' and dataset[i][1] != '?' and dataset[i][10] != '?': 
                 year.append((int(dataset[i][2].split("-")[0]) - int(dataset[i][1].split("-")[0]))*365)
@@ -42,6 +61,14 @@ for i in range(len(dataset)):
                 difference.append('error')
                 dataset[i][14] = 'error'
                 dataset[i][15] = 'error'
+                
+        if dataset[i][2] != '?':
+                tempMonthNewYear = abs(int(dataset[i][2].split("-")[1]) - 12)*30
+                dataset[i][17] = tempMonthNewYear + abs(int(dataset[i][2].split("-")[2]) - 31)
+                
+                tempMonthValentine = abs(int(dataset[i][2].split("-")[1]) - 2)*30
+                dataset[i][16] = tempMonthValentine + abs(int(dataset[i][2].split("-")[2]) - 14)
+
 
 items = np.array(dataset[:,3],int)
 colors = np.array(dataset[:,5],str)
@@ -137,10 +164,10 @@ dataset = np.delete(dataset, 1, 1)
 dataset = np.delete(dataset, 0, 1)
 dataset = np.array(dataset,float) 
 
-dataset[:,[8, 10]] = dataset[:,[10, 8]]
+dataset[:,[8, 12]] = dataset[:,[12, 8]]
 
 
-dataset[:, :10] = stats.zscore(dataset[:, :10],axis=0)
+dataset[:, :12] = stats.zscore(dataset[:, :12],axis=0)
 
 
 np.savetxt("testDataset.csv", dataset, delimiter=",", fmt="%s")
