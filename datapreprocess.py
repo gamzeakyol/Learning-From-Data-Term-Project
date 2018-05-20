@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon May  7 17:23:36 2018
-@author: mloz & gam
+@author: mloz & gam & pelo
 """
 
 import numpy as np
@@ -11,21 +11,23 @@ from collections import Counter
 from sklearn.preprocessing import OneHotEncoder
 
 
-trainDataset = pd.read_csv('minitrain.txt')
+trainDataset = pd.read_csv('train.txt')
 trainDataset['age'] = -1
 trainDataset['deliveryDuration'] = -1
 trainDataset['closenessToValentine'] = -1
 trainDataset['closenessToNewYearsEve'] = -1
-
+trainDataset['risk'] = -1
 trainDataset = np.array(trainDataset, dtype = str)
 
 year = []
 month = []
 day = []
 difference = []
+r = np.zeros((len(uniqueItems),3))
 
 cnt = Counter(trainDataset[:, 10])
 mostCommon = cnt.most_common(3)
+customerID = 0
 
 for i in range(len(trainDataset)):
         trainDataset[i][4] = trainDataset[i][4].lower()
@@ -68,6 +70,8 @@ for i in range(len(trainDataset)):
                 
                 tempMonthValentine = abs(int(trainDataset[i][2].split("-")[1]) - 2)*30
                 trainDataset[i][16] = tempMonthValentine + abs(int(trainDataset[i][2].split("-")[2]) - 14)
+                
+        
 
 items = np.array(trainDataset[:,3],int)
 colors = np.array(trainDataset[:,5],str)
@@ -115,6 +119,14 @@ for i in unique_states:
 
 uniqueStates = np.array(uniqueStates)
 
+items = np.array(trainDataset[:,3],str)
+unique_items = set(items)
+uniqueItems = []
+for i in unique_items:
+        uniqueItems.append(i)
+
+uniqueItems = np.array(uniqueItems)
+
 for i in range(len(trainDataset)):
         for j in range(len(uniqueGenders)):
                 if trainDataset[i][9] == uniqueGenders[j]:
@@ -154,12 +166,17 @@ sizesOneHot = np.zeros((len(noErrorDataset),len(uniqueSizes)))
 sizesOneHot[np.arange(len(noErrorDataset)), noErrorDataset[:,1]] = 1
 '''
 
+for i in range(len(noErrorDataset)):
+    r[i][0] = noErrorDataset[i][12]
+    if noErrorDataset[i][12] == 0
+        r[i][1] += 1
+    else:
+        r[i][2] += 1
+    
+
 noErrorDataset[:, :12] = stats.zscore(noErrorDataset[:, :12],axis=0)
 
 np.savetxt("trainDataset.csv", noErrorDataset, delimiter=",", fmt="%s")
 
-
-a = np.array([1, 0, 3])
-b = np.zeros((3, 4))
-b[np.arange(3), a] = 1
-print(b)
+ 
+def riskCalculation (n):
