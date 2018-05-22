@@ -8,10 +8,15 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from collections import Counter
-from sklearn.preprocessing import OneHotEncoder
 
 
-trainDataset = pd.read_csv('train.txt')
+def getCategoricalArray(unique, array):
+    sizesArrayOneHot = np.array(array,int)
+    sizesOneHot = np.zeros((len(noErrorDataset),len(unique)))
+    sizesOneHot[np.arange(len(noErrorDataset)), sizesArrayOneHot] = 1
+    return sizesOneHot
+
+trainDataset = pd.read_csv('minitrain.txt')
 trainDataset['age'] = -1
 trainDataset['deliveryDuration'] = -1
 trainDataset['closenessToValentine'] = -1
@@ -23,7 +28,6 @@ year = []
 month = []
 day = []
 difference = []
-r = np.zeros((len(uniqueItems),3))
 
 cnt = Counter(trainDataset[:, 10])
 mostCommon = cnt.most_common(3)
@@ -34,42 +38,68 @@ for i in range(len(trainDataset)):
         
         #fix colors
         if trainDataset[i][5] == 'blau':
-                trainDataset[i][5] = 'blue'
+            trainDataset[i][5] = 'blue'
                 
         elif trainDataset[i][5] == 'brwon':
-                trainDataset[i][5] = 'brown'
+            trainDataset[i][5] = 'brown'
                 
         elif trainDataset[i][5] == 'ol' or trainDataset[i][5] == 'oliv':
-                trainDataset[i][5] = 'olive'
+            trainDataset[i][5] = 'olive'
                 
         # no country for old men
         if trainDataset[i][10].split("-")[0] == "1900":
-                trainDataset[i][10] = mostCommon[2][0]
+            trainDataset[i][10] = mostCommon[2][0]
 
         if trainDataset[i][2] != '?' and trainDataset[i][1] != '?' and trainDataset[i][10] != '?': 
-                year.append((int(trainDataset[i][2].split("-")[0]) - int(trainDataset[i][1].split("-")[0]))*365)
-                month.append((int(trainDataset[i][2].split("-")[1]) - int(trainDataset[i][1].split("-")[1]))*30)
-                day.append((int(trainDataset[i][2].split("-")[2]) - int(trainDataset[i][1].split("-")[2])))
-                difference.append(year[-1] + month[-1] + day[-1])
-                trainDataset[i][14] = int(trainDataset[i][1].split("-")[0]) - int(trainDataset[i][10].split("-")[0])
-                trainDataset[i][15] = difference[i]
+            year.append((int(trainDataset[i][2].split("-")[0]) - int(trainDataset[i][1].split("-")[0]))*365)
+            month.append((int(trainDataset[i][2].split("-")[1]) - int(trainDataset[i][1].split("-")[1]))*30)
+            day.append((int(trainDataset[i][2].split("-")[2]) - int(trainDataset[i][1].split("-")[2])))
+            difference.append(year[-1] + month[-1] + day[-1])
+            trainDataset[i][14] = int(trainDataset[i][1].split("-")[0]) - int(trainDataset[i][10].split("-")[0])
+            trainDataset[i][15] = difference[i]
                 
-                if difference[i] < 0:
-                        difference[i] = "Time error"
+            if difference[i] < 0:
+                    difference[i] = "Time error"
         else:
-                year.append('error')
-                month.append('error')
-                day.append('error')
-                difference.append('error')
-                trainDataset[i][14] = 'error'
-                trainDataset[i][15] = 'error'
+            year.append('error')
+            month.append('error')
+            day.append('error')
+            difference.append('error')
+            trainDataset[i][14] = 'error'
+            trainDataset[i][15] = 'error'
         
+        # closness to special days
         if trainDataset[i][2] != '?':
-                tempMonthNewYear = abs(int(trainDataset[i][2].split("-")[1]) - 12)*30
-                trainDataset[i][17] = tempMonthNewYear + abs(int(trainDataset[i][2].split("-")[2]) - 31)
+            orderMonth = int(trainDataset[i][2].split("-")[1])
+            orderDay = int(trainDataset[i][2].split("-")[2])
+            if orderMonth > 6:
+                tempMonthNewYear = (12-orderMonth)*30
+                trainDataset[i][17] = tempMonthNewYear + 31 - orderDay
+            else: 
+                tempMonthNewYear = orderMonth*30
+                trainDataset[i][17] = tempMonthNewYear + orderDay
                 
-                tempMonthValentine = abs(int(trainDataset[i][2].split("-")[1]) - 2)*30
-                trainDataset[i][16] = tempMonthValentine + abs(int(trainDataset[i][2].split("-")[2]) - 14)
+            if 2 < orderMonth < 8:
+                if orderDay > 14:
+                    temp = orderDay - 14
+                    temp += (orderMonth-2)*30
+                    trainDataset[i][16] = temp
+                else:
+                    temp = 30 - (14-orderDay)
+                    temp += (orderMonth - 2 -1) * 30
+                    trainDataset[i][16] = temp
+            elif orderMonth == 2:
+                    trainDataset[i][16] = abs(orderDay - 14)
+            else:
+                if orderDay > 14:
+                    temp = 30 - (orderDay - 14)
+                    temp += (12 - orderMonth -1 + 2) * 30
+                    trainDataset[i][16] = temp
+                else:
+                    temp = 14 - orderDay
+                    temp += (12 - orderMonth + 2)*30
+                    trainDataset[i][16] = temp
+
                 
         
 
@@ -89,7 +119,6 @@ uniqueColors = np.array(uniqueColors)
         for j in range(84):
                 if uniqueColors[j] == color:
                         break
-
 "      item_color[int(dataset[i][3])-1,j] += 1'''
 '''for i in range(len(dataset)):
         if dataset[i][5] == '?':
@@ -126,6 +155,8 @@ for i in unique_items:
         uniqueItems.append(i)
 
 uniqueItems = np.array(uniqueItems)
+
+r = np.zeros((len(uniqueItems),3))
 
 for i in range(len(trainDataset)):
         for j in range(len(uniqueGenders)):
@@ -165,18 +196,18 @@ noErrorDataset[:,[8, 12]] = noErrorDataset[:,[12, 8]]
 sizesOneHot = np.zeros((len(noErrorDataset),len(uniqueSizes)))
 sizesOneHot[np.arange(len(noErrorDataset)), noErrorDataset[:,1]] = 1
 '''
-
+'''
 for i in range(len(noErrorDataset)):
     r[i][0] = noErrorDataset[i][12]
-    if noErrorDataset[i][12] == 0
+    if noErrorDataset[i][12] == 0:
         r[i][1] += 1
     else:
         r[i][2] += 1
-    
+'''    
 
 noErrorDataset[:, :12] = stats.zscore(noErrorDataset[:, :12],axis=0)
 
 np.savetxt("trainDataset.csv", noErrorDataset, delimiter=",", fmt="%s")
 
  
-def riskCalculation (n):
+#def riskCalculation (n):
