@@ -33,6 +33,17 @@ cnt = Counter(trainDataset[:, 10])
 mostCommon = cnt.most_common(3)
 customerID = 0
 
+items = np.array(trainDataset[:,3],str)
+unique_items = set(items)
+uniqueItems = []
+for i in unique_items:
+        uniqueItems.append(i)
+
+uniqueItems = np.array(uniqueItems)
+
+r = np.zeros((len(uniqueItems),2))
+risk = np.zeros((len(uniqueItems), 1))
+
 for i in range(len(trainDataset)):
         trainDataset[i][4] = trainDataset[i][4].lower()
         
@@ -99,7 +110,22 @@ for i in range(len(trainDataset)):
                     temp = 14 - orderDay
                     temp += (12 - orderMonth + 2)*30
                     trainDataset[i][16] = temp
-
+                    
+        #Gam
+        for j in range(len(uniqueItems)):
+                if uniqueItems[j] == trainDataset[i][3]:
+                    if trainDataset[i][13] == 0:
+                        r[j][0] += 1
+                    else:
+                        r[j][1] += 1
+#Gam              
+for i in range(len(r)):
+    risk[i] = float(5 + r[i][1]) / float(10 + r[i][0] + r[i][1])
+    
+for i in range(len(trainDataset)):
+    for j in range(len(risk)):
+        '''if uniqueItems[j] == trainDataset[i][3]:
+            trainDataset[i]['risk'] = risk[j]'''
                 
         
 
