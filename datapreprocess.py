@@ -138,7 +138,7 @@ for i in range(len(r)):
 for i in range(len(trainDataset)):
     for j in range(len(risk)):
         '''if uniqueItems[j] == trainDataset[i][3]:
-            trainDataset[i]['risk'] = risk[j]'''
+            trainDataset[i][18] = risk[j]'''
                 
         
 
