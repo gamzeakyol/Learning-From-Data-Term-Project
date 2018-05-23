@@ -108,9 +108,7 @@ colors = np.array(trainDataset[:,5],str)
 
 #item_color = np.zeros((2945, 84),int)
 unique_colors = set(colors)
-uniqueColors = []
-for i in unique_colors:
-        uniqueColors.append(i)
+uniqueColors = list(unique_colors)
 
 uniqueColors = np.array(uniqueColors)
 
@@ -126,33 +124,25 @@ uniqueColors = np.array(uniqueColors)
 '''
 sizes = np.array(trainDataset[:,4],str)
 unique_sizes = set(sizes)
-uniqueSizes = []
-for i in unique_sizes:
-        uniqueSizes.append(i)
+uniqueSizes = list(unique_sizes)
 
 uniqueSizes = np.array(uniqueSizes)
      
 genders = np.array(trainDataset[:,9],str)
 unique_genders = set(genders)
-uniqueGenders = []
-for i in unique_genders:
-        uniqueGenders.append(i)
+uniqueGenders = list(unique_genders)
 
 uniqueGenders = np.array(uniqueGenders)
 
 states = np.array(trainDataset[:,11],str)
 unique_states = set(states)
-uniqueStates = []
-for i in unique_states:
-        uniqueStates.append(i)
+uniqueStates = list(unique_states)
 
 uniqueStates = np.array(uniqueStates)
 
 items = np.array(trainDataset[:,3],str)
 unique_items = set(items)
-uniqueItems = []
-for i in unique_items:
-        uniqueItems.append(i)
+uniqueItems = list(unique_items)
 
 uniqueItems = np.array(uniqueItems)
 
@@ -175,6 +165,18 @@ for i in range(len(trainDataset)):
                 if trainDataset[i][11] == uniqueStates[j]:
                         trainDataset[i][11] = j
                         break
+                    
+customers = np.array(trainDataset[:,8],int)     
+uniqueCustomers = set(customers)
+uniqueCustomers = list(uniqueCustomers)
+
+#uniqueCustomers = np.array(uniqueCustomers)
+
+richness = np.zeros((len(uniqueCustomers),3))
+richness[:,0] = uniqueCustomers 
+for i in range(len(trainDataset)):
+    index_of_ID_in_unique = uniqueCustomers.index(int(trainDataset[i][8]))
+    richness[index_of_ID_in_unique][1] += float(trainDataset[i][7])
 
 noErrorDataset = []
 
@@ -205,7 +207,7 @@ for i in range(len(noErrorDataset)):
         r[i][2] += 1
 '''    
 
-noErrorDataset[:, :12] = stats.zscore(noErrorDataset[:, :12],axis=0)
+noErrorDataset[:, :12] = stats.zscore(noErrorDataset[:, :12],axis=0)   #normalize ediliyor
 
 np.savetxt("trainDataset.csv", noErrorDataset, delimiter=",", fmt="%s")
 
