@@ -22,6 +22,8 @@ trainDataset['deliveryDuration'] = -1
 trainDataset['closenessToValentine'] = -1
 trainDataset['closenessToNewYearsEve'] = -1
 trainDataset['risk'] = -1
+trainDataset['averageSpentMoney'] = -1
+trainDataset['shoppingFrequency'] = -1
 trainDataset = np.array(trainDataset, dtype = str)
 
 year = []
@@ -35,14 +37,19 @@ customerID = 0
 
 items = np.array(trainDataset[:,3],str)
 unique_items = set(items)
-uniqueItems = []
-for i in unique_items:
-        uniqueItems.append(i)
-
+uniqueItems = list(unique_items)
 uniqueItems = np.array(uniqueItems)
+
+customers = np.array(trainDataset[:,8],str)
+unique_customers  = set(customers)
+uniqueCustomers = list(unique_customers)
+uniqueCustomers= np.array(uniqueCustomers)
 
 r = np.zeros((len(uniqueItems),2))
 risk = np.zeros((len(uniqueItems), 1))
+
+# 0th column total spent money, 1st column is purchase count
+customerInfo = np.zeros((len(uniqueCustomers),2))
 
 for i in range(len(trainDataset)):
         trainDataset[i][4] = trainDataset[i][4].lower()
@@ -99,6 +106,7 @@ for i in range(len(trainDataset)):
                     temp = 30 - (14-orderDay)
                     temp += (orderMonth - 2 -1) * 30
                     trainDataset[i][16] = temp
+                    
             elif orderMonth == 2:
                     trainDataset[i][16] = abs(orderDay - 14)
             else:
@@ -111,14 +119,19 @@ for i in range(len(trainDataset)):
                     temp += (12 - orderMonth + 2)*30
                     trainDataset[i][16] = temp
                     
-        #Gam
+        # Gam
         for j in range(len(uniqueItems)):
                 if uniqueItems[j] == trainDataset[i][3]:
-                    if trainDataset[i][13] == 0:
+                    if trainDataset[i][13] == "0.0":
                         r[j][0] += 1
                     else:
                         r[j][1] += 1
-#Gam              
+        # Mah
+        for j in range(len(uniqueCustomers)):
+                if uniqueCustomers[j] == trainDataset[i][8]:
+                    customerInfo[j][0] += float(trainDataset[i][7])
+                    customerInfo[j][1] += 1
+#Gam                
 for i in range(len(r)):
     risk[i] = float(5 + r[i][1]) / float(10 + r[i][0] + r[i][1])
     
