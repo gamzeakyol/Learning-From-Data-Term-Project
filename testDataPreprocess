@@ -30,7 +30,7 @@ dataset['manufacturerRisk'] = -1
 # if test set is processed
 dataset['dummyReturnShipment'] = -1
 dataset = np.array(dataset, dtype = str)
-trainDataset = np.array(trainDataset, dtype = str)
+trainDataset = np.array(trainDataset , dtype = str)
 
 year = []
 month = []
@@ -41,14 +41,21 @@ cnt = Counter(dataset[:, 10])
 mostCommon = cnt.most_common(3)
 customerID = 0
 
-items = np.array(trainDataset[:,3],str)
+trainItems = np.array(trainDataset[:,3],str)
+testItems = np.array(dataset[:,3],str)
+items = np.concatenate((trainItems, testItems), axis=0)
 uniqueItems = np.array(list(set(items)))
 
-customers = np.array(trainDataset[:,8],int)
+trainCustomers = np.array(trainDataset[:,8],int)
+testCustomers = np.array(dataset[:,8],int)
+customers = np.concatenate((trainCustomers, testCustomers), axis=0)
 uniqueCustomers = list(set(customers))
 
-manufacturer = np.array(trainDataset[:,6],str)
+trainMans = np.array(trainDataset[:,6],int)
+testMans = np.array(dataset[:,6],int)
+manufacturer = np.concatenate((trainMans, testMans), axis=0)
 uniqueMans = np.array(list(set(manufacturer)))
+
 
 r = np.zeros((len(uniqueItems),2))
 risk = np.zeros((len(uniqueItems), 1))
@@ -168,11 +175,25 @@ for i in range(len(dataset)):
         if uniqueMans[j] == dataset[i][6]:
             dataset[i,21] = man_risk[j]
 
-items = np.array(dataset[:,3],int)
-colors = np.array(dataset[:,5],str)
 
-#item_color = np.zeros((2945, 84),int)
+for i in range(len(trainDataset)):
+        trainDataset[i][4] = trainDataset[i][4].lower()
+        
+        #fix colors
+        if trainDataset[i][5] == 'blau':
+            trainDataset[i][5] = 'blue'
+                
+        elif trainDataset[i][5] == 'brwon':
+            trainDataset[i][5] = 'brown'
+                
+        elif trainDataset[i][5] == 'ol' or trainDataset[i][5] == 'oliv':
+            trainDataset[i][5] = 'olive'
+            
+            
 
+trainColors = np.array(trainDataset[:,5],str)
+testColors = np.array(dataset[:,5],str)
+colors = np.concatenate((trainColors, testColors), axis=0)
 uniqueColors = np.array(list(set(colors)))
 
 '''for i in range(len(dataset)):
@@ -180,25 +201,26 @@ uniqueColors = np.array(list(set(colors)))
         for j in range(84):
                 if uniqueColors[j] == color:
                         break
-
 "      item_color[int(dataset[i][3])-1,j] += 1'''
 '''for i in range(len(dataset)):
         if dataset[i][5] == '?':
                 dataset[i][5] = uniqueColors[np.argmax(item_color[int(dataset[i][3])])]
 '''
-sizes = np.array(dataset[:,4],str)
+trainSizes = np.array(trainDataset[:,4],str)
+testSizes = np.array(dataset[:,4],str)
+sizes = np.concatenate((trainSizes, testSizes), axis=0)
 uniqueSizes = np.array(list(set(sizes)))
      
-genders = np.array(dataset[:,9],str)
+trainGenders = np.array(trainDataset[:,9],str)
+testGenders = np.array(dataset[:,9],str)
+genders = np.concatenate((trainGenders, testGenders), axis=0)
 uniqueGenders = np.array(list(set(genders)))
 
-states = np.array(dataset[:,11],str)
+trainStates = np.array(trainDataset[:,11],str)
+testStates = np.array(dataset[:,11],str)
+states = np.concatenate((trainStates, testStates), axis=0)
 uniqueStates = np.array(list(set(states)))
 
-items = np.array(dataset[:,3],str)
-uniqueItems = np.array(list(set(items)))
-
-r = np.zeros((len(uniqueItems),3))
 
 for i in range(len(dataset)):
         for j in range(len(uniqueGenders)):
@@ -260,18 +282,16 @@ dataset = np.delete(dataset, 2, 1)
 dataset = np.delete(dataset, 1, 1)
 dataset = np.delete(dataset, 0, 1)
 dataset = np.array(dataset,float) 
-dataset[:,[8, 12]] = dataset[:,[12, 8]]
+dataset[:,[1, 7]] = dataset[:,[7, 1]]
 
-oneHotNoErrorDataset = np.zeros((len(dataset),8+71+5+100+16),float)
+oneHotNoErrorDataset = np.zeros((len(dataset),8+5+122+88+16),float)
 oneHotNoErrorDataset[:,:7] = dataset[:,:7]
-oneHotNoErrorDataset[:,7:78] = onehotColors
-oneHotNoErrorDataset[:,78:83] = onehotGenders
-oneHotNoErrorDataset[:,83:183] = onehotSizes
-oneHotNoErrorDataset[:,183:199] = onehotStates
+oneHotNoErrorDataset[:,7:12] = onehotColors
+oneHotNoErrorDataset[:,12:134] = onehotGenders
+oneHotNoErrorDataset[:,134:222] = onehotSizes
+oneHotNoErrorDataset[:,222:238] = onehotStates
 oneHotNoErrorDataset[:,-1] = dataset[:,-1]
 
-
-dataset[:, :12] = stats.zscore(dataset[:, :7],axis=0)
-
+dataset[:, :7] = stats.zscore(dataset[:, :7],axis=0)
 
 np.savetxt("testDataset.csv", oneHotNoErrorDataset, delimiter=",", fmt="%s")
