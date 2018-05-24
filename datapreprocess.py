@@ -40,10 +40,11 @@ unique_items = set(items)
 uniqueItems = list(unique_items)
 uniqueItems = np.array(uniqueItems)
 
-customers = np.array(trainDataset[:,8],str)
+customers = np.array(trainDataset[:,8],int)
 unique_customers  = set(customers)
 uniqueCustomers = list(unique_customers)
 uniqueCustomers= np.array(uniqueCustomers)
+
 
 r = np.zeros((len(uniqueItems),2))
 risk = np.zeros((len(uniqueItems), 1))
@@ -110,7 +111,7 @@ for i in range(len(trainDataset)):
             elif orderMonth == 2:
                     trainDataset[i][16] = abs(orderDay - 14)
             else:
-                if orderDay > 14:
+                if orderDay > 14: 
                     temp = 30 - (orderDay - 14)
                     temp += (12 - orderMonth -1 + 2) * 30
                     trainDataset[i][16] = temp
@@ -137,10 +138,12 @@ for i in range(len(r)):
     
 for i in range(len(trainDataset)):
     for j in range(len(risk)):
-        '''if uniqueItems[j] == trainDataset[i][3]:
-            trainDataset[i][18] = risk[j]'''
-                
-        
+        if uniqueItems[j] == trainDataset[i][3]:
+            trainDataset[i][18] = risk[j]
+    for j in range(len(uniqueCustomers)):
+        if uniqueCustomers[j] == trainDataset[i][8]:
+            trainDataset[i,19] = str(customerInfo[j,0]/customerInfo[j,1])
+            trainDataset[i,20] = customerInfo[j,1]
 
 items = np.array(trainDataset[:,3],int)
 colors = np.array(trainDataset[:,5],str)
