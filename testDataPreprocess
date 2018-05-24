@@ -136,11 +136,6 @@ for i in range(len(dataset)):
         index_of_ID_in_unique = uniqueCustomers.index(int(dataset[i][8]))
         customerInfo[index_of_ID_in_unique][1] += float(dataset[i][7])
         customerInfo[index_of_ID_in_unique][2] += 1
-        # Mah
-        for j in range(len(uniqueCustomers)):
-                if uniqueCustomers[j] == int(dataset[i][8]):
-                    customerInfo[j][0] += float(dataset[i][7])
-                    customerInfo[j][1] += 1
                     
         # Gam
         for j in range(len(uniqueMans)):
