@@ -16,7 +16,8 @@ def getCategoricalArray(unique, array):
     sizesOneHot[np.arange(len(noErrorDataset)), sizesArrayOneHot] = 1
     return sizesOneHot
 
-trainDataset = pd.read_csv('minitrain.txt')
+trainDataset = pd.read_csv('train.txt')
+testDataset = pd.read_csv('test.txt')
 trainDataset['age'] = -1
 trainDataset['deliveryDuration'] = -1
 trainDataset['closenessToValentine'] = -1
@@ -26,6 +27,7 @@ trainDataset['averageSpentMoney'] = -1
 trainDataset['shoppingFrequency'] = -1
 trainDataset['manufacturerRisk'] = -1
 trainDataset = np.array(trainDataset, dtype = str)
+testDataset = np.array(testDataset, dtype = str)
 
 year = []
 month = []
@@ -36,13 +38,20 @@ cnt = Counter(trainDataset[:, 10])
 mostCommon = cnt.most_common(3)
 customerID = 0
 
-items = np.array(trainDataset[:,3],str)
+
+trainItems = np.array(trainDataset[:,3],str)
+testItems = np.array(testDataset[:,3],str)
+items = np.concatenate((trainItems, testItems), axis=0)
 uniqueItems = np.array(list(set(items)))
 
-customers = np.array(trainDataset[:,8],int)
+trainCustomers = np.array(trainDataset[:,8],int)
+testCustomers = np.array(testDataset[:,8],int)
+customers = np.concatenate((trainCustomers, testCustomers), axis=0)
 uniqueCustomers = list(set(customers))
 
-manufacturer = np.array(trainDataset[:,6],str)
+trainMans = np.array(trainDataset[:,6],int)
+testMans = np.array(testDataset[:,6],int)
+manufacturer = np.concatenate((trainMans, testMans), axis=0)
 uniqueMans = np.array(list(set(manufacturer)))
 
 r = np.zeros((len(uniqueItems),2))
@@ -134,12 +143,7 @@ for i in range(len(trainDataset)):
         index_of_ID_in_unique = uniqueCustomers.index(int(trainDataset[i][8]))
         customerInfo[index_of_ID_in_unique][1] += float(trainDataset[i][7])
         customerInfo[index_of_ID_in_unique][2] += 1
-        # Mah
-        '''for j in range(len(uniqueCustomers)):
-                if uniqueCustomers[j] == int(trainDataset[i][8]):
-                    customerInfo[j][0] += float(trainDataset[i][7])
-                    customerInfo[j][1] += 1
-        '''            
+       
         # Gam
         for j in range(len(uniqueMans)):
                 if uniqueMans[j] == trainDataset[i][6]:
@@ -172,10 +176,24 @@ for i in range(len(trainDataset)):
     for j in range(len(man_risk)):
         if uniqueMans[j] == trainDataset[i][6]:
             trainDataset[i,21] = man_risk[j]
+            
+            
+for i in range(len(testDataset)):
+        testDataset[i][4] = testDataset[i][4].lower()
+        
+        #fix colors
+        if testDataset[i][5] == 'blau':
+            testDataset[i][5] = 'blue'
+                
+        elif testDataset[i][5] == 'brwon':
+            testDataset[i][5] = 'brown'
+                
+        elif testDataset[i][5] == 'ol' or testDataset[i][5] == 'oliv':
+            testDataset[i][5] = 'olive'
 
-colors = np.array(trainDataset[:,5],str)
-
-#item_color = np.zeros((2945, 84),int)
+trainColors = np.array(trainDataset[:,5],str)
+testColors = np.array(testDataset[:,5],str)
+colors = np.concatenate((trainColors, testColors), axis=0)
 uniqueColors = np.array(list(set(colors)))
 
 '''for i in range(len(dataset)):
@@ -188,13 +206,19 @@ uniqueColors = np.array(list(set(colors)))
         if dataset[i][5] == '?':
                 dataset[i][5] = uniqueColors[np.argmax(item_color[int(dataset[i][3])])]
 '''
-sizes = np.array(trainDataset[:,4],str)
+trainSizes = np.array(trainDataset[:,4],str)
+testSizes = np.array(testDataset[:,4],str)
+sizes = np.concatenate((trainSizes, testSizes), axis=0)
 uniqueSizes = np.array(list(set(sizes)))
      
-genders = np.array(trainDataset[:,9],str)
+trainGenders = np.array(trainDataset[:,9],str)
+testGenders = np.array(testDataset[:,9],str)
+genders = np.concatenate((trainGenders, testGenders), axis=0)
 uniqueGenders = np.array(list(set(genders)))
 
-states = np.array(trainDataset[:,11],str)
+trainStates = np.array(trainDataset[:,11],str)
+testStates = np.array(testDataset[:,11],str)
+states = np.concatenate((trainStates, testStates), axis=0)
 uniqueStates = np.array(list(set(states)))
 
 for i in range(len(trainDataset)):
@@ -246,13 +270,12 @@ noErrorDataset = np.array(noErrorDataset,float)
 
 noErrorDataset[:,[1, 7]] = noErrorDataset[:,[7, 1]]
 
-
-oneHotNoErrorDataset = np.zeros((len(noErrorDataset),8+71+5+100+16),float)
+oneHotNoErrorDataset = np.zeros((len(noErrorDataset),8+5+122+88+16),float)
 oneHotNoErrorDataset[:,:7] = noErrorDataset[:,:7]
-oneHotNoErrorDataset[:,7:78] = onehotColors
-oneHotNoErrorDataset[:,78:83] = onehotGenders
-oneHotNoErrorDataset[:,83:183] = onehotSizes
-oneHotNoErrorDataset[:,183:199] = onehotStates
+oneHotNoErrorDataset[:,7:12] = onehotColors
+oneHotNoErrorDataset[:,12:134] = onehotGenders
+oneHotNoErrorDataset[:,134:222] = onehotSizes
+oneHotNoErrorDataset[:,222:238] = onehotStates
 oneHotNoErrorDataset[:,-1] = noErrorDataset[:,-1]
 
 '''
