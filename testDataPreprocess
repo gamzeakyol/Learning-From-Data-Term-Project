@@ -9,11 +9,22 @@ import pandas as pd
 from scipy import stats
 from collections import Counter
 
+def getCategoricalArray(unique, array):
+    sizesArrayOneHot = np.array(array,int)
+    sizesOneHot = np.zeros((len(dataset),len(unique)))
+    sizesOneHot[np.arange(len(dataset)), sizesArrayOneHot] = 1
+    return sizesOneHot
+
 dataset = pd.read_csv('test.txt')
 dataset['age'] = -1
 dataset['deliveryDuration'] = -1
 dataset['closenessToValentine'] = -1
 dataset['closenessToNewYearsEve'] = -1
+dataset['risk'] = -1
+dataset['averageSpentMoney'] = -1
+dataset['shoppingFrequency'] = -1
+dataset['manufacturerRisk'] = -1
+dataset = np.array(dataset, dtype = str)
 
 # if test set is processed
 dataset['dummyReturnShipment'] = -1
@@ -26,6 +37,25 @@ difference = []
 
 cnt = Counter(dataset[:, 10])
 mostCommon = cnt.most_common(3)
+customerID = 0
+
+items = np.array(dataset[:,3],str)
+uniqueItems = np.array(list(set(items)))
+
+customers = np.array(dataset[:,8],int)
+uniqueCustomers = np.array(list(set(customers)))
+
+manufacturer = np.array(dataset[:,6],str)
+uniqueMans = np.array(list(set(manufacturer)))
+
+r = np.zeros((len(uniqueItems),2))
+risk = np.zeros((len(uniqueItems), 1))
+
+m = np.zeros((len(uniqueMans),2))
+man_risk = np.zeros((len(uniqueMans), 1))
+
+# 0th column total spent money, 1st column is purchase count
+customerInfo = np.zeros((len(uniqueCustomers),2))
 
 for i in range(len(dataset)):
         dataset[i][4] = dataset[i][4].lower()
@@ -63,24 +93,83 @@ for i in range(len(dataset)):
                 dataset[i][15] = 'error'
                 
         if dataset[i][2] != '?':
-                tempMonthNewYear = abs(int(dataset[i][2].split("-")[1]) - 12)*30
-                dataset[i][17] = tempMonthNewYear + abs(int(dataset[i][2].split("-")[2]) - 31)
+            orderMonth = int(dataset[i][2].split("-")[1])
+            orderDay = int(dataset[i][2].split("-")[2])
+            if orderMonth > 6:
+                tempMonthNewYear = (12-orderMonth)*30
+                dataset[i][17] = tempMonthNewYear + 31 - orderDay
+            else: 
+                tempMonthNewYear = orderMonth*30
+                dataset[i][17] = tempMonthNewYear + orderDay
                 
-                tempMonthValentine = abs(int(dataset[i][2].split("-")[1]) - 2)*30
-                dataset[i][16] = tempMonthValentine + abs(int(dataset[i][2].split("-")[2]) - 14)
+            if 2 < orderMonth < 8:
+                if orderDay > 14:
+                    temp = orderDay - 14
+                    temp += (orderMonth-2)*30
+                    dataset[i][16] = temp
+                else:
+                    temp = 30 - (14-orderDay)
+                    temp += (orderMonth - 2 -1) * 30
+                    dataset[i][16] = temp
+                    
+            elif orderMonth == 2:
+                    dataset[i][16] = abs(orderDay - 14)
+            else:
+                if orderDay > 14: 
+                    temp = 30 - (orderDay - 14)
+                    temp += (12 - orderMonth -1 + 2) * 30
+                    dataset[i][16] = temp
+                else:
+                    temp = 14 - orderDay
+                    temp += (12 - orderMonth + 2)*30
+                    dataset[i][16] = temp
+                
+                # Gam
+        for j in range(len(uniqueItems)):
+                if uniqueItems[j] == dataset[i][3]:
+                    if dataset[i][13] == "0.0":
+                        r[j][0] += 1
+                    else:
+                        r[j][1] += 1
+        # Mah
+        for j in range(len(uniqueCustomers)):
+                if uniqueCustomers[j] == dataset[i][8]:
+                    customerInfo[j][0] += float(dataset[i][7])
+                    customerInfo[j][1] += 1
+                    
+        # Gam
+        for j in range(len(uniqueMans)):
+                if uniqueMans[j] == dataset[i][6]:
+                    if dataset[i][13] == "0.0":
+                        m[j][0] += 1
+                    else:
+                        m[j][1] += 1
 
+#Gam                
+for i in range(len(r)):
+    risk[i] = float(5 + r[i][1]) / float(10 + r[i][0] + r[i][1])
+    
+for i in range(len(m)):
+    man_risk[i] = float(5 + m[i][1]) / float(10 + m[i][0] + m[i][1])
+    
+for i in range(len(dataset)):
+    for j in range(len(risk)):
+        if uniqueItems[j] == dataset[i][3]:
+            dataset[i,18] = risk[j]
+    for j in range(len(uniqueCustomers)):
+        if uniqueCustomers[j] == dataset[i][8]:
+            dataset[i,19] = str(customerInfo[j,0]/customerInfo[j,1])
+            dataset[i,20] = customerInfo[j,1]
+    for j in range(len(man_risk)):
+        if uniqueMans[j] == dataset[i][6]:
+            dataset[i,21] = man_risk[j]
 
 items = np.array(dataset[:,3],int)
 colors = np.array(dataset[:,5],str)
 
 #item_color = np.zeros((2945, 84),int)
 
-unique_colors = set(colors)
-uniqueColors = []
-for i in unique_colors:
-        uniqueColors.append(i)
-
-uniqueColors = np.array(uniqueColors)
+uniqueColors = np.array(list(set(colors)))
 
 '''for i in range(len(dataset)):
         color = dataset[i][5]
@@ -94,28 +183,18 @@ uniqueColors = np.array(uniqueColors)
                 dataset[i][5] = uniqueColors[np.argmax(item_color[int(dataset[i][3])])]
 '''
 sizes = np.array(dataset[:,4],str)
-unique_sizes = set(sizes)
-uniqueSizes = []
-for i in unique_sizes:
-        uniqueSizes.append(i)
-
-uniqueSizes = np.array(uniqueSizes)
+uniqueSizes = np.array(list(set(sizes)))
      
 genders = np.array(dataset[:,9],str)
-unique_genders = set(genders)
-uniqueGenders = []
-for i in unique_genders:
-        uniqueGenders.append(i)
-
-uniqueGenders = np.array(uniqueGenders)
+uniqueGenders = np.array(list(set(genders)))
 
 states = np.array(dataset[:,11],str)
-unique_states = set(states)
-uniqueStates = []
-for i in unique_states:
-        uniqueStates.append(i)
+uniqueStates = np.array(list(set(states)))
 
-uniqueStates = np.array(uniqueStates)
+items = np.array(dataset[:,3],str)
+uniqueItems = np.array(list(set(items)))
+
+r = np.zeros((len(uniqueItems),3))
 
 for i in range(len(dataset)):
         for j in range(len(uniqueGenders)):
