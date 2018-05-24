@@ -40,7 +40,7 @@ items = np.array(trainDataset[:,3],str)
 uniqueItems = np.array(list(set(items)))
 
 customers = np.array(trainDataset[:,8],int)
-uniqueCustomers = np.array(list(set(customers)))
+uniqueCustomers = list(set(customers))
 
 manufacturer = np.array(trainDataset[:,6],str)
 uniqueMans = np.array(list(set(manufacturer)))
@@ -52,7 +52,8 @@ m = np.zeros((len(uniqueMans),2))
 man_risk = np.zeros((len(uniqueMans), 1))
 
 # 0th column total spent money, 1st column is purchase count
-customerInfo = np.zeros((len(uniqueCustomers),2))
+customerInfo = np.zeros((len(uniqueCustomers),3))
+customerInfo[:,0] = uniqueCustomers
 
 for i in range(len(trainDataset)):
         trainDataset[i][4] = trainDataset[i][4].lower()
@@ -129,9 +130,13 @@ for i in range(len(trainDataset)):
                         r[j][0] += 1
                     else:
                         r[j][1] += 1
+                        
+        index_of_ID_in_unique = uniqueCustomers.index(int(trainDataset[i][8]))
+        customerInfo[index_of_ID_in_unique][1] += float(trainDataset[i][7])
+        customerInfo[index_of_ID_in_unique][2] += 1
         # Mah
         '''for j in range(len(uniqueCustomers)):
-                if uniqueCustomers[j] == trainDataset[i][8]:
+                if uniqueCustomers[j] == int(trainDataset[i][8]):
                     customerInfo[j][0] += float(trainDataset[i][7])
                     customerInfo[j][1] += 1
         '''            
@@ -142,7 +147,6 @@ for i in range(len(trainDataset)):
                         m[j][0] += 1
                     else:
                         m[j][1] += 1
-
 
 #Gam                
 for i in range(len(r)):
@@ -160,10 +164,11 @@ for i in range(len(trainDataset)):
     for j in range(len(risk)):
         if uniqueItems[j] == trainDataset[i][3]:
             trainDataset[i,18] = risk[j]
-    '''for j in range(len(uniqueCustomers)):
-        if uniqueCustomers[j] == trainDataset[i][8]:
-            trainDataset[i,19] = str(customerInfo[j,0]/customerInfo[j,1])
-            trainDataset[i,20] = customerInfo[j,1]'''
+            
+    index_of_ID_in_unique = uniqueCustomers.index(int(trainDataset[i][8]))
+    trainDataset[i,19] = str(customerInfo[index_of_ID_in_unique][1]/customerInfo[index_of_ID_in_unique][2])
+    trainDataset[i,20] = customerInfo[index_of_ID_in_unique][2]
+            
     for j in range(len(man_risk)):
         if uniqueMans[j] == trainDataset[i][6]:
             trainDataset[i,21] = man_risk[j]
@@ -210,21 +215,6 @@ for i in range(len(trainDataset)):
                         trainDataset[i][11] = j
                         break
                 
-                
-                    
-'''
-customers = np.array(trainDataset[:,8],int)     
-uniqueCustomers = set(customers)
-uniqueCustomers = list(uniqueCustomers)
-'''
-#uniqueCustomers = np.array(uniqueCustomers)
-'''
-richness = np.zeros((len(uniqueCustomers),3))
-richness[:,0] = uniqueCustomers 
-for i in range(len(trainDataset)):
-    index_of_ID_in_unique = uniqueCustomers.index(int(trainDataset[i][8]))
-    richness[index_of_ID_in_unique][1] += float(trainDataset[i][7])
-'''
 noErrorDataset = []
 
 for i in range(len(trainDataset)):
