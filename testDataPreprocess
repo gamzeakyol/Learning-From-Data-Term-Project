@@ -30,6 +30,7 @@ dataset['manufacturerRisk'] = -1
 # if test set is processed
 dataset['dummyReturnShipment'] = -1
 dataset = np.array(dataset, dtype = str)
+trainDataset = np.array(trainDataset, dtype = str)
 
 year = []
 month = []
