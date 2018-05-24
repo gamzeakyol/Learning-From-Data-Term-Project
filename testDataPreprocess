@@ -124,7 +124,7 @@ for i in range(len(dataset)):
                     temp += (12 - orderMonth + 2)*30
                     dataset[i][16] = temp
                 
-                # Gam
+        # Gam
         for j in range(len(uniqueItems)):
                 if uniqueItems[j] == dataset[i][3]:
                     if dataset[i][13] == "0.0":
@@ -235,16 +235,36 @@ for i in range(len(dataset)):
                 print(i)
                 print(dataset)
                 break
-        
+            
+onehotGenders = getCategoricalArray(uniqueGenders, dataset[:,9])
+onehotSizes = getCategoricalArray(uniqueSizes, dataset[:,4])
+onehotColors = getCategoricalArray(uniqueColors, dataset[:,5])
+onehotStates = getCategoricalArray(uniqueStates, dataset[:,11])
+
+dataset = np.delete(dataset, 20, 1)
+dataset = np.delete(dataset, 19, 1)
 dataset = np.delete(dataset, 12, 1)
+dataset = np.delete(dataset, 11, 1) # states
 dataset = np.delete(dataset, 10, 1)
+dataset = np.delete(dataset, 9, 1)  # genders
+dataset = np.delete(dataset, 8, 1)  # customer id
+dataset = np.delete(dataset, 6, 1)  # manufacturer id
+dataset = np.delete(dataset, 5, 1)  # colors
+dataset = np.delete(dataset, 4, 1)  # sizes
+dataset = np.delete(dataset, 3, 1)  # item id
 dataset = np.delete(dataset, 2, 1)
 dataset = np.delete(dataset, 1, 1)
 dataset = np.delete(dataset, 0, 1)
 dataset = np.array(dataset,float) 
-
 dataset[:,[8, 12]] = dataset[:,[12, 8]]
 
+oneHotNoErrorDataset = np.zeros((len(dataset),8+71+5+100+16),float)
+oneHotNoErrorDataset[:,:7] = dataset[:,:7]
+oneHotNoErrorDataset[:,7:78] = onehotColors
+oneHotNoErrorDataset[:,78:83] = onehotGenders
+oneHotNoErrorDataset[:,83:183] = onehotSizes
+oneHotNoErrorDataset[:,183:199] = onehotStates
+oneHotNoErrorDataset[:,-1] = dataset[:,-1]
 
 dataset[:, :12] = stats.zscore(dataset[:, :12],axis=0)
 
