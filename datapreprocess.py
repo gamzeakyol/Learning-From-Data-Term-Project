@@ -37,19 +37,13 @@ mostCommon = cnt.most_common(3)
 customerID = 0
 
 items = np.array(trainDataset[:,3],str)
-unique_items = set(items)
-uniqueItems = list(unique_items)
-uniqueItems = np.array(uniqueItems)
+uniqueItems = np.array(list(set(items)))
 
 customers = np.array(trainDataset[:,8],int)
-unique_customers  = set(customers)
-uniqueCustomers = list(unique_customers)
-uniqueCustomers= np.array(uniqueCustomers)
+uniqueCustomers = np.array(list(set(customers)))
 
 manufacturer = np.array(trainDataset[:,6],str)
-unique_mans = set(items)
-uniqueMans = list(unique_mans)
-uniqueMans = np.array(uniqueMans)
+uniqueMans = np.array(list(set(manufacturer)))
 
 r = np.zeros((len(uniqueItems),2))
 risk = np.zeros((len(uniqueItems), 1))
@@ -136,11 +130,11 @@ for i in range(len(trainDataset)):
                     else:
                         r[j][1] += 1
         # Mah
-        for j in range(len(uniqueCustomers)):
+        '''for j in range(len(uniqueCustomers)):
                 if uniqueCustomers[j] == trainDataset[i][8]:
                     customerInfo[j][0] += float(trainDataset[i][7])
                     customerInfo[j][1] += 1
-                    
+        '''            
         # Gam
         for j in range(len(uniqueMans)):
                 if uniqueMans[j] == trainDataset[i][6]:
@@ -148,33 +142,36 @@ for i in range(len(trainDataset)):
                         m[j][0] += 1
                     else:
                         m[j][1] += 1
+
+
 #Gam                
 for i in range(len(r)):
     risk[i] = float(5 + r[i][1]) / float(10 + r[i][0] + r[i][1])
+
+risk = np.ravel(risk)
     
 for i in range(len(m)):
     man_risk[i] = float(5 + m[i][1]) / float(10 + m[i][0] + m[i][1])
-    
+
+man_risk = np.ravel(man_risk)
+
+# Update rows 
 for i in range(len(trainDataset)):
     for j in range(len(risk)):
         if uniqueItems[j] == trainDataset[i][3]:
             trainDataset[i,18] = risk[j]
-    for j in range(len(uniqueCustomers)):
+    '''for j in range(len(uniqueCustomers)):
         if uniqueCustomers[j] == trainDataset[i][8]:
             trainDataset[i,19] = str(customerInfo[j,0]/customerInfo[j,1])
-            trainDataset[i,20] = customerInfo[j,1]
+            trainDataset[i,20] = customerInfo[j,1]'''
     for j in range(len(man_risk)):
-        if uniqueItems[j] == trainDataset[i][6]:
+        if uniqueMans[j] == trainDataset[i][6]:
             trainDataset[i,21] = man_risk[j]
 
-items = np.array(trainDataset[:,3],int)
 colors = np.array(trainDataset[:,5],str)
 
 #item_color = np.zeros((2945, 84),int)
-unique_colors = set(colors)
-uniqueColors = list(unique_colors)
-
-uniqueColors = np.array(uniqueColors)
+uniqueColors = np.array(list(set(colors)))
 
 '''for i in range(len(dataset)):
         color = dataset[i][5]
@@ -187,30 +184,13 @@ uniqueColors = np.array(uniqueColors)
                 dataset[i][5] = uniqueColors[np.argmax(item_color[int(dataset[i][3])])]
 '''
 sizes = np.array(trainDataset[:,4],str)
-unique_sizes = set(sizes)
-uniqueSizes = list(unique_sizes)
-
-uniqueSizes = np.array(uniqueSizes)
+uniqueSizes = np.array(list(set(sizes)))
      
 genders = np.array(trainDataset[:,9],str)
-unique_genders = set(genders)
-uniqueGenders = list(unique_genders)
-
-uniqueGenders = np.array(uniqueGenders)
+uniqueGenders = np.array(list(set(genders)))
 
 states = np.array(trainDataset[:,11],str)
-unique_states = set(states)
-uniqueStates = list(unique_states)
-
-uniqueStates = np.array(uniqueStates)
-
-items = np.array(trainDataset[:,3],str)
-unique_items = set(items)
-uniqueItems = list(unique_items)
-
-uniqueItems = np.array(uniqueItems)
-
-r = np.zeros((len(uniqueItems),3))
+uniqueStates = np.array(list(set(states)))
 
 for i in range(len(trainDataset)):
         for j in range(len(uniqueGenders)):
@@ -229,28 +209,46 @@ for i in range(len(trainDataset)):
                 if trainDataset[i][11] == uniqueStates[j]:
                         trainDataset[i][11] = j
                         break
+                
+                
                     
+'''
 customers = np.array(trainDataset[:,8],int)     
 uniqueCustomers = set(customers)
 uniqueCustomers = list(uniqueCustomers)
-
+'''
 #uniqueCustomers = np.array(uniqueCustomers)
-
+'''
 richness = np.zeros((len(uniqueCustomers),3))
 richness[:,0] = uniqueCustomers 
 for i in range(len(trainDataset)):
     index_of_ID_in_unique = uniqueCustomers.index(int(trainDataset[i][8]))
     richness[index_of_ID_in_unique][1] += float(trainDataset[i][7])
-
+'''
 noErrorDataset = []
 
 for i in range(len(trainDataset)):
         if trainDataset[i][2] != '?' and trainDataset[i][5] != '?' and trainDataset[i][10] != '?' and difference[i] != 'Time error':
                 noErrorDataset.append(trainDataset[i])
-        
 noErrorDataset = np.array(noErrorDataset)
+
+onehotGenders = getCategoricalArray(uniqueGenders, noErrorDataset[:,9])
+onehotSizes = getCategoricalArray(uniqueSizes, noErrorDataset[:,4])
+onehotColors = getCategoricalArray(uniqueColors, noErrorDataset[:,5])
+onehotStates = getCategoricalArray(uniqueStates, noErrorDataset[:,11])
+
+
+noErrorDataset = np.delete(noErrorDataset, 20, 1)
+noErrorDataset = np.delete(noErrorDataset, 19, 1)
 noErrorDataset = np.delete(noErrorDataset, 12, 1)
+noErrorDataset = np.delete(noErrorDataset, 11, 1) # states
 noErrorDataset = np.delete(noErrorDataset, 10, 1)
+noErrorDataset = np.delete(noErrorDataset, 9, 1)  # genders
+noErrorDataset = np.delete(noErrorDataset, 8, 1)  # customer id
+noErrorDataset = np.delete(noErrorDataset, 6, 1)  # manufacturer id
+noErrorDataset = np.delete(noErrorDataset, 5, 1)  # colors
+noErrorDataset = np.delete(noErrorDataset, 4, 1)  # sizes
+noErrorDataset = np.delete(noErrorDataset, 3, 1)  # item id
 noErrorDataset = np.delete(noErrorDataset, 2, 1)
 noErrorDataset = np.delete(noErrorDataset, 1, 1)
 noErrorDataset = np.delete(noErrorDataset, 0, 1)
