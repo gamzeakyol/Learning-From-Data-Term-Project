@@ -254,7 +254,16 @@ noErrorDataset = np.delete(noErrorDataset, 1, 1)
 noErrorDataset = np.delete(noErrorDataset, 0, 1)
 noErrorDataset = np.array(noErrorDataset,float) 
 
-noErrorDataset[:,[8, 12]] = noErrorDataset[:,[12, 8]]
+noErrorDataset[:,[1, 7]] = noErrorDataset[:,[7, 1]]
+
+
+oneHotNoErrorDataset = np.zeros((len(noErrorDataset),8+71+5+100+16),float)
+oneHotNoErrorDataset[:,:7] = noErrorDataset[:,:7]
+oneHotNoErrorDataset[:,7:78] = onehotColors
+oneHotNoErrorDataset[:,78:83] = onehotGenders
+oneHotNoErrorDataset[:,83:183] = onehotSizes
+oneHotNoErrorDataset[:,183:199] = onehotStates
+oneHotNoErrorDataset[:,-1] = noErrorDataset[:,-1]
 
 '''
 sizesOneHot = np.zeros((len(noErrorDataset),len(uniqueSizes)))
@@ -269,6 +278,6 @@ for i in range(len(noErrorDataset)):
         r[i][2] += 1
 '''    
 
-noErrorDataset[:, :12] = stats.zscore(noErrorDataset[:, :12],axis=0)   #normalize ediliyor
+oneHotNoErrorDataset[:, :7] = stats.zscore(oneHotNoErrorDataset[:, :7],axis=0)   #normalize ediliyor
 
-np.savetxt("trainDataset.csv", noErrorDataset, delimiter=",", fmt="%s")
+np.savetxt("trainDataset.csv", oneHotNoErrorDataset, delimiter=",", fmt="%s")
