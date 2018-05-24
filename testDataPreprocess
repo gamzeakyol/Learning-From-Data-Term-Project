@@ -43,7 +43,7 @@ items = np.array(dataset[:,3],str)
 uniqueItems = np.array(list(set(items)))
 
 customers = np.array(dataset[:,8],int)
-uniqueCustomers = np.array(list(set(customers)))
+uniqueCustomers = list(set(customers))
 
 manufacturer = np.array(dataset[:,6],str)
 uniqueMans = np.array(list(set(manufacturer)))
@@ -55,7 +55,8 @@ m = np.zeros((len(uniqueMans),2))
 man_risk = np.zeros((len(uniqueMans), 1))
 
 # 0th column total spent money, 1st column is purchase count
-customerInfo = np.zeros((len(uniqueCustomers),2))
+customerInfo = np.zeros((len(uniqueCustomers),3))
+customerInfo[:,0] = uniqueCustomers
 
 for i in range(len(dataset)):
         dataset[i][4] = dataset[i][4].lower()
@@ -131,9 +132,13 @@ for i in range(len(dataset)):
                         r[j][0] += 1
                     else:
                         r[j][1] += 1
+        
+        index_of_ID_in_unique = uniqueCustomers.index(int(dataset[i][8]))
+        customerInfo[index_of_ID_in_unique][1] += float(dataset[i][7])
+        customerInfo[index_of_ID_in_unique][2] += 1
         # Mah
         for j in range(len(uniqueCustomers)):
-                if uniqueCustomers[j] == dataset[i][8]:
+                if uniqueCustomers[j] == int(dataset[i][8]):
                     customerInfo[j][0] += float(dataset[i][7])
                     customerInfo[j][1] += 1
                     
@@ -156,10 +161,11 @@ for i in range(len(dataset)):
     for j in range(len(risk)):
         if uniqueItems[j] == dataset[i][3]:
             dataset[i,18] = risk[j]
-    for j in range(len(uniqueCustomers)):
-        if uniqueCustomers[j] == dataset[i][8]:
-            dataset[i,19] = str(customerInfo[j,0]/customerInfo[j,1])
-            dataset[i,20] = customerInfo[j,1]
+    
+    index_of_ID_in_unique = uniqueCustomers.index(int(dataset[i][8]))
+    dataset[i,19] = str(customerInfo[index_of_ID_in_unique][1]/customerInfo[index_of_ID_in_unique][2])
+    dataset[i,20] = customerInfo[index_of_ID_in_unique][2]
+           
     for j in range(len(man_risk)):
         if uniqueMans[j] == dataset[i][6]:
             dataset[i,21] = man_risk[j]
@@ -266,7 +272,8 @@ oneHotNoErrorDataset[:,83:183] = onehotSizes
 oneHotNoErrorDataset[:,183:199] = onehotStates
 oneHotNoErrorDataset[:,-1] = dataset[:,-1]
 
+
 dataset[:, :12] = stats.zscore(dataset[:, :12],axis=0)
 
 
-np.savetxt("testDataset.csv", dataset, delimiter=",", fmt="%s")
+np.savetxt("testDataset.csv", oneHotNoErrorDataset, delimiter=",", fmt="%s")
