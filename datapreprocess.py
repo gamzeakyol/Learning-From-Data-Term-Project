@@ -24,6 +24,7 @@ trainDataset['closenessToNewYearsEve'] = -1
 trainDataset['risk'] = -1
 trainDataset['averageSpentMoney'] = -1
 trainDataset['shoppingFrequency'] = -1
+trainDataset['manufacturerRisk'] = -1
 trainDataset = np.array(trainDataset, dtype = str)
 
 year = []
@@ -45,9 +46,16 @@ unique_customers  = set(customers)
 uniqueCustomers = list(unique_customers)
 uniqueCustomers= np.array(uniqueCustomers)
 
+manufacturer = np.array(trainDataset[:,6],str)
+unique_mans = set(items)
+uniqueMans = list(unique_mans)
+uniqueMans = np.array(uniqueMans)
 
 r = np.zeros((len(uniqueItems),2))
 risk = np.zeros((len(uniqueItems), 1))
+
+m = np.zeros((len(uniqueMans),2))
+man_risk = np.zeros((len(uniqueMans), 1))
 
 # 0th column total spent money, 1st column is purchase count
 customerInfo = np.zeros((len(uniqueCustomers),2))
@@ -132,18 +140,32 @@ for i in range(len(trainDataset)):
                 if uniqueCustomers[j] == trainDataset[i][8]:
                     customerInfo[j][0] += float(trainDataset[i][7])
                     customerInfo[j][1] += 1
+                    
+        # Gam
+        for j in range(len(uniqueMans)):
+                if uniqueMans[j] == trainDataset[i][6]:
+                    if trainDataset[i][13] == "0.0":
+                        m[j][0] += 1
+                    else:
+                        m[j][1] += 1
 #Gam                
 for i in range(len(r)):
     risk[i] = float(5 + r[i][1]) / float(10 + r[i][0] + r[i][1])
     
+for i in range(len(m)):
+    man_risk[i] = float(5 + m[i][1]) / float(10 + m[i][0] + m[i][1])
+    
 for i in range(len(trainDataset)):
     for j in range(len(risk)):
         if uniqueItems[j] == trainDataset[i][3]:
-            trainDataset[i][18] = risk[j]
+            trainDataset[i,18] = risk[j]
     for j in range(len(uniqueCustomers)):
         if uniqueCustomers[j] == trainDataset[i][8]:
             trainDataset[i,19] = str(customerInfo[j,0]/customerInfo[j,1])
             trainDataset[i,20] = customerInfo[j,1]
+    for j in range(len(man_risk)):
+        if uniqueItems[j] == trainDataset[i][6]:
+            trainDataset[i,21] = man_risk[j]
 
 items = np.array(trainDataset[:,3],int)
 colors = np.array(trainDataset[:,5],str)
@@ -252,6 +274,3 @@ for i in range(len(noErrorDataset)):
 noErrorDataset[:, :12] = stats.zscore(noErrorDataset[:, :12],axis=0)   #normalize ediliyor
 
 np.savetxt("trainDataset.csv", noErrorDataset, delimiter=",", fmt="%s")
-
- 
-#def riskCalculation (n):
