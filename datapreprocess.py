@@ -270,12 +270,12 @@ noErrorDataset = np.array(noErrorDataset,float)
 
 noErrorDataset[:,[1, 7]] = noErrorDataset[:,[7, 1]]
 
-oneHotNoErrorDataset = np.zeros((len(noErrorDataset),8+5+122+88+16),float)
+oneHotNoErrorDataset = np.zeros((len(noErrorDataset),8+5+265+320+16),float)
 oneHotNoErrorDataset[:,:7] = noErrorDataset[:,:7]
-oneHotNoErrorDataset[:,7:12] = onehotColors
-oneHotNoErrorDataset[:,12:134] = onehotGenders
-oneHotNoErrorDataset[:,134:222] = onehotSizes
-oneHotNoErrorDataset[:,222:238] = onehotStates
+oneHotNoErrorDataset[:,7:12] = onehotGenders
+oneHotNoErrorDataset[:,12:277] = onehotColors
+oneHotNoErrorDataset[:,277:597] = onehotSizes
+oneHotNoErrorDataset[:,597:613] = onehotStates
 oneHotNoErrorDataset[:,-1] = noErrorDataset[:,-1]
 
 '''
